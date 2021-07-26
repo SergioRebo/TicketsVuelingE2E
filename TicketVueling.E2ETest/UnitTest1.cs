@@ -34,7 +34,7 @@ namespace TicketVueling.E2E.Test
             this.SelectAdults(_chromeDriver, 1);
             //this.SelectExtraSeat(_chromeDriver, true, ExtraSeat.TwoExtraSeat);
             this.SearchFly(_chromeDriver);
-            this.SelectPrice(_chromeDriver, 8, 0);
+            this.SelectPrice(_chromeDriver, 0);
             this.SelectTarifas(_chromeDriver, 7, Tarifas.Optimus);
         }
 
@@ -122,12 +122,8 @@ namespace TicketVueling.E2E.Test
             webdriver.FindElement(By.Id("divButtonBuscadorNormal")).Click();
         }
 
-        private void SelectPrice(IWebDriver webdriver, double waitTime, int indexPrice)
+        private void SelectPrice(IWebDriver webdriver, int indexPrice)
         {
-            WebDriverWait wait = new WebDriverWait(webdriver, TimeSpan.FromSeconds(waitTime));
-
-            wait.Until(driver => driver.FindElement(By.Id("selectFlightButton")));
-
             var flights = webdriver.FindElements(By.Id("flightCardsContainer"));
             var flight = flights[indexPrice];
             flight.FindElement(By.Id("justPrice")).Click();
@@ -138,7 +134,7 @@ namespace TicketVueling.E2E.Test
             //var tarifas = webdriver.FindElements(By.ClassName("fares-box"));
             //var tarifa = tarifas[(int)numTarifa];
 
-            webdriver.FindElement(By.Id("OptimaFareBox")).FindElement(By.Id("fares-box_radio")).Click();
+            webdriver.FindElement(By.Id("optimaFareBox")).FindElement(By.ClassName("fares-box_radio")).Click();
             webdriver.FindElement(By.Id("stvContinueButton")).Click();
         }
     }
