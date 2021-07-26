@@ -31,10 +31,10 @@ namespace TicketVueling.E2E.Test
             this.SelectOriginCity(_firefoxDriver, "Barcelona");
             this.SelectDestinyCity(_firefoxDriver, "Bruselas");
             this.SelectDate(_firefoxDriver);
-            this.SelectAdults(_firefoxDriver, 1);
+            this.SelectAdults(_firefoxDriver, 1, 10);
             //this.SelectExtraSeat(_chromeDriver, true, ExtraSeat.TwoExtraSeat);
             this.SearchFly(_firefoxDriver);
-            this.SelectPrice(_firefoxDriver, 0);
+            this.SelectPrice(_firefoxDriver, 0, 10);
             this.SelectTarifas(_firefoxDriver, 7, Tarifas.Optimus);
         }
 
@@ -73,8 +73,7 @@ namespace TicketVueling.E2E.Test
 
         private void SelectDate(IWebDriver webdriver)
         {
-            webdriver.FindElement(By.Id("datePickerTitleCloseButton")).Click();
-            //*[@id="datePickerContainer"]/div[1]/table/tbody/tr[5]/td[1]/a
+            webdriver.FindElement(By.XPath("/html/body/div[11]/div/div/div[1]/table/tbody/tr[5]/td[4]/a")).Click();
         }
 
         private void SelectTypeCity(IWebDriver webdriver, string typeCity)
@@ -102,7 +101,7 @@ namespace TicketVueling.E2E.Test
             radio[(int)num].Click();
         }
 
-        private void SelectAdults(IWebDriver webdriver, int adults)
+        private void SelectAdults(IWebDriver webdriver, int adults, double waitTime)
         {
             var adultsBtn = webdriver.FindElements(By.ClassName("adt_select_button"));
             adultsBtn[adults].Click();
@@ -122,8 +121,12 @@ namespace TicketVueling.E2E.Test
             webdriver.FindElement(By.Id("divButtonBuscadorNormal")).Click();
         }
 
-        private void SelectPrice(IWebDriver webdriver, int indexPrice)
+        private void SelectPrice(IWebDriver webdriver, int indexPrice, double waitTime)
         {
+            WebDriverWait wait = new WebDriverWait(webdriver, TimeSpan.FromSeconds(waitTime));
+
+            wait.Until(driver => driver.FindElement(By.Id("flightCardContent")));
+
             var flights = webdriver.FindElements(By.Id("flightCardsContainer"));
             var flight = flights[indexPrice];
             flight.FindElement(By.Id("justPrice")).Click();
