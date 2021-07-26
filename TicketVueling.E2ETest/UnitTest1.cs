@@ -11,38 +11,38 @@ namespace TicketVueling.E2E.Test
     [TestClass]
     public class UnitTest1
     {
-        public static IWebDriver _chromeDriver;
+        public static IWebDriver _firefoxDriver;
 
         [ClassInitialize]
         public static void Setup(TestContext testContext)
         {
-            _chromeDriver = new FirefoxDriver();
-            _chromeDriver.Url = "https://tickets.vueling.com/";
+            _firefoxDriver = new FirefoxDriver();
+            _firefoxDriver.Url = "https://tickets.vueling.com/";
         }
 
         [TestMethod]
         public void Test1()
         {
-            WebDriverWait wait = new WebDriverWait(_chromeDriver, TimeSpan.FromSeconds(5));
-            var url = (_chromeDriver.Url == "https://tickets.vueling.com/ScheduleSelectNew.aspx");
+            WebDriverWait wait = new WebDriverWait(_firefoxDriver, TimeSpan.FromSeconds(5));
+            var url = (_firefoxDriver.Url == "https://tickets.vueling.com/ScheduleSelectNew.aspx");
 
-            this.AcceptCookies(_chromeDriver, 3);
-            this.SelectRadioButton(_chromeDriver, TripType.OneWay, 3);
-            this.SelectOriginCity(_chromeDriver, "Barcelona");
-            this.SelectDestinyCity(_chromeDriver, "Bruselas");
-            this.SelectDate(_chromeDriver);
-            this.SelectAdults(_chromeDriver, 1);
+            this.AcceptCookies(_firefoxDriver, 3);
+            this.SelectRadioButton(_firefoxDriver, TripType.OneWay, 3);
+            this.SelectOriginCity(_firefoxDriver, "Barcelona");
+            this.SelectDestinyCity(_firefoxDriver, "Bruselas");
+            this.SelectDate(_firefoxDriver);
+            this.SelectAdults(_firefoxDriver, 1);
             //this.SelectExtraSeat(_chromeDriver, true, ExtraSeat.TwoExtraSeat);
-            this.SearchFly(_chromeDriver);
-            this.SelectPrice(_chromeDriver, 0);
-            this.SelectTarifas(_chromeDriver, 7, Tarifas.Optimus);
+            this.SearchFly(_firefoxDriver);
+            this.SelectPrice(_firefoxDriver, 0);
+            this.SelectTarifas(_firefoxDriver, 7, Tarifas.Optimus);
         }
 
         [TestCleanup]
         public void TearDown()
         {
-            _chromeDriver.Close();
-            _chromeDriver.Quit();
+            _firefoxDriver.Close();
+            _firefoxDriver.Quit();
         }
 
         public void AcceptCookies(IWebDriver webdriver, double waitTime)
