@@ -1,10 +1,13 @@
 ﻿using System;
+using System.Threading;
+using System.Threading.Tasks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Chrome;
 using OpenQA.Selenium.Firefox;
 using OpenQA.Selenium.Support.UI;
 using TicketVueling.E2ETest.Utils;
+[assembly: Parallelize(Workers = 0, Scope = ExecutionScope.MethodLevel)]
 
 namespace TicketVueling.E2E.Test
 {
@@ -12,133 +15,63 @@ namespace TicketVueling.E2E.Test
     public class UnitTest1
     {
         public static IWebDriver _firefoxDriver;
+        public static IWebDriver _chromeDriver;
+        Model test = new Model();
 
         [ClassInitialize]
         public static void Setup(TestContext testContext)
         {
-            _firefoxDriver = new FirefoxDriver();
+            Drivers driver = new Drivers();
+            _chromeDriver = driver.GetDriver(WebDrivers.Chrome);
+            _chromeDriver.Url = "https://tickets.vueling.com/";
+
+            _firefoxDriver = driver.GetDriver(WebDrivers.Firefox);
             _firefoxDriver.Url = "https://tickets.vueling.com/";
         }
 
         [TestMethod]
-        public void Test1()
+        public async Task TestChrome()
+        {
+            WebDriverWait wait = new WebDriverWait(_chromeDriver, TimeSpan.FromSeconds(5));
+            var url = (_chromeDriver.Url == "https://tickets.vueling.com/ScheduleSelectNew.aspx");
+
+            test.AcceptCookies(_chromeDriver, 10); 
+            test.SelectRadioButton(_chromeDriver, TripType.OneWay, 10);
+            await test.SelectOriginCity(_chromeDriver, "Barcelona", 10);
+            await test .SelectDestinyCity(_chromeDriver, "Bruselas", 10);
+            test.SelectDate(_chromeDriver);
+            test.SelectAdults(_chromeDriver, 1, 10);
+            //this.SelectExtraSeat(_firefoxDriver, true, ExtraSeat.TwoExtraSeat);
+            test.SearchFly(_chromeDriver, 10);
+            test.SelectPrice(_chromeDriver, 0, 10);
+            test.SelectTarifas(_chromeDriver, 7, Tarifas.Optimus);
+        }
+
+        [TestMethod]
+        public async Task TestFireFox()
         {
             WebDriverWait wait = new WebDriverWait(_firefoxDriver, TimeSpan.FromSeconds(5));
             var url = (_firefoxDriver.Url == "https://tickets.vueling.com/ScheduleSelectNew.aspx");
 
-            this.AcceptCookies(_firefoxDriver, 3);
-            this.SelectRadioButton(_firefoxDriver, TripType.OneWay, 3);
-            this.SelectOriginCity(_firefoxDriver, "Barcelona");
-            this.SelectDestinyCity(_firefoxDriver, "Bruselas");
-            this.SelectDate(_firefoxDriver);
-            this.SelectAdults(_firefoxDriver, 1, 10);
-            //this.SelectExtraSeat(_chromeDriver, true, ExtraSeat.TwoExtraSeat);
-            this.SearchFly(_firefoxDriver);
-            this.SelectPrice(_firefoxDriver, 0, 10);
-            this.SelectTarifas(_firefoxDriver, 7, Tarifas.Optimus);
+            test.AcceptCookies(_firefoxDriver, 10);
+            test.SelectRadioButton(_firefoxDriver, TripType.OneWay, 10);
+            await test.SelectOriginCity(_firefoxDriver, "Barcelona", 10);
+            await test.SelectDestinyCity(_firefoxDriver, "Bruselas", 10);
+            test.SelectDate(_firefoxDriver);
+            test.SelectAdults(_firefoxDriver, 1, 10);
+            //this.SelectExtraSeat(_firefoxDriver, true, ExtraSeat.TwoExtraSeat);
+            test.SearchFly(_firefoxDriver, 10);
+            test.SelectPrice(_firefoxDriver, 0, 10);
+            test.SelectTarifas(_firefoxDriver, 7, Tarifas.Optimus);
         }
 
         [TestCleanup]
         public void TearDown()
         {
-            _firefoxDriver.Close();
-            _firefoxDriver.Quit();
+            _chromeDriver.Close();
+            _chromeDriver.Quit();
         }
 
-        public void AcceptCookies(IWebDriver webdriver, double waitTime)
-        {
-            //todo el tema del waittime es para dar tiempo entre paso y paso ya que a veces va rápido y no se pueden apreciar 
-            WebDriverWait wait = new WebDriverWait(webdriver, TimeSpan.FromSeconds(waitTime));
-            wait.Until(driver => driver.FindElement(By.Id("ensBannerDescription")));
-
-            var button = webdriver.FindElement(By.Id("ensCloseBanner"));
-
-            if (button.Displayed)
-            {
-                button.Click(); //Click para simular que da click al botón (como es lógico)
-            }
-        }
-
-        private void SelectOriginCity(IWebDriver webdriver, string city)
-        {
-            this.SelectTypeCity(webdriver, "origin");
-            this.WriteBox(webdriver, "AvailabilitySearchInputSearchView_TextBoxMarketOrigin1", city);
-        }
-
-        private void SelectDestinyCity(IWebDriver webdriver, string city)
-        {
-            this.SelectTypeCity(webdriver, "destination");
-            this.WriteBox(webdriver, "AvailabilitySearchInputSearchView_TextBoxMarketDestination1", city);
-        }
-
-        private void SelectDate(IWebDriver webdriver)
-        {
-            webdriver.FindElement(By.XPath("/html/body/div[11]/div/div/div[1]/table/tbody/tr[5]/td[4]/a")).Click();
-        }
-
-        private void SelectTypeCity(IWebDriver webdriver, string typeCity)
-        {
-            webdriver.FindElement(By.Id(typeCity)).Click();
-        }
-
-        private void WriteBox(IWebDriver webdriver, string id, string place)
-        {
-            //sendkeys nos hace una simulación de lo que escribimos en el elemento, y tab para pasar al siguiente elemento
-            //en este caso pasar de caja de origen a destino.
-            webdriver.FindElement(By.Id(id)).SendKeys(place);
-            webdriver.FindElement(By.Id(id)).SendKeys(Keys.Tab);
-        }
         
-        private void SelectRadioButton(IWebDriver webdriver,TripType num, double waitTime)
-        {
-            WebDriverWait wait = new WebDriverWait(webdriver, TimeSpan.FromSeconds(waitTime));
-
-            wait.Until(driver => driver.FindElement(By.Id("radiosBuscador")));
-            
-            //el findElements nos devuelve un array de elementos. Como en nuestro caso teníamos los tres radiobuttons con la misma clase
-            //y nos devuelve un array con los tres. Usamos un enum para coger el que queramos (no un int como hacía yo antes mindundi)
-            var radio = webdriver.FindElements(By.ClassName("elForm_radio--label"));
-            radio[(int)num].Click();
-        }
-
-        private void SelectAdults(IWebDriver webdriver, int adults, double waitTime)
-        {
-            var adultsBtn = webdriver.FindElements(By.ClassName("adt_select_button"));
-            adultsBtn[adults].Click();
-        }
-
-        private void SelectExtraSeat(IWebDriver webdriver, bool check, ExtraSeat numSeat)
-        {
-            if (check == true)
-            {
-                webdriver.FindElement(By.Id("isExtraSeat"));
-                var extraSeats = webdriver.FindElements(By.Id("extraSeatOptionsList"));
-                extraSeats[(int)numSeat].Click();
-            }
-        }
-        private void SearchFly(IWebDriver webdriver)
-        {
-            webdriver.FindElement(By.Id("divButtonBuscadorNormal")).Click();
-        }
-
-        private void SelectPrice(IWebDriver webdriver, int indexPrice, double waitTime)
-        {
-            WebDriverWait wait = new WebDriverWait(webdriver, TimeSpan.FromSeconds(waitTime));
-
-            wait.Until(driver => driver.FindElement(By.Id("flightCardContent")));
-
-            var flights = webdriver.FindElements(By.Id("flightCardsContainer"));
-            var flight = flights[indexPrice];
-            flight.FindElement(By.Id("justPrice")).Click();
-        }
-
-        private void SelectTarifas(IWebDriver webdriver, double waitTime, Tarifas numTarifa)
-        {
-            //var tarifas = webdriver.FindElements(By.ClassName("fares-box"));
-            //var tarifa = tarifas[(int)numTarifa];
-
-            webdriver.FindElement(By.Id("optimaFareBox")).FindElement(By.ClassName("fares-box_radio")).Click();
-            webdriver.FindElement(By.Id("stvContinueButton")).Click();
-        }
     }
 }
